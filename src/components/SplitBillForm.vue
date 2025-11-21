@@ -75,24 +75,24 @@
           <div
             v-for="(fee, index) in fees"
             :key="index"
-            class="flex gap-3 p-3 bg-slate-50 rounded-xl"
+            class="flex gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-xl transition-colors"
           >
             <input
               v-model="fee.name"
               type="text"
               placeholder="Fee Name (e.g., Delivery, Tax)"
-              class="flex-1 px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              class="flex-1 px-4 py-2 bg-white dark:bg-slate-600 border border-slate-200 dark:border-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-400"
             />
             <input
               :value="formatNumberInput(fee.amount)"
               @input="(e) => handleFeeAmountInput(e, index)"
               type="text"
               :placeholder="`Amount (${getCurrencySymbol()})`"
-              class="w-32 px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              class="w-32 px-4 py-2 bg-white dark:bg-slate-600 border border-slate-200 dark:border-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-400"
             />
             <button
               @click="removeFee(index)"
-              class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
+              class="p-2 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition"
               :disabled="fees.length <= 1"
               :class="{ 'opacity-40 cursor-not-allowed': fees.length <= 1 }"
             >
