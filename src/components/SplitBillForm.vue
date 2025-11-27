@@ -485,10 +485,19 @@ const handleImageUpload = async (event) => {
   ocrError.value = ''
 
   try {
-    const worker = await createWorker('eng')
+    const worker = await createWorker('eng+ind', 1, {
+      logger: m => console.log(m)
+    })
+
+    await worker.setParameters({
+      tessedit_char_whitelist: '0123456789.,ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%$Rp ',
+      tessedit_pageseg_mode: '6'
+    })
+
     const { data: { text } } = await worker.recognize(file)
     await worker.terminate()
 
+    console.log('OCR Result:', text)
     parseReceiptText(text)
   } catch (error) {
     console.error('OCR Error:', error)
@@ -500,69 +509,178 @@ const handleImageUpload = async (event) => {
 }
 
 const parseReceiptText = (text) => {
-  const lines = text.split('\n').map(line => line.trim()).filter(line => line)
+  const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0)
 
-  const pricePattern = /(?:Rp\.?|IDR|USD|\$)?\s*([0-9]{1,3}(?:[.,][0-9]{3})*(?:[.,][0-9]{2})?)/gi
-  const prices = []
+  console.log('Parsed Lines:', lines)
 
-  lines.forEach(line => {
-    const matches = line.matchAll(pricePattern)
-    for (const match of matches) {
-      const priceStr = match[1].replace(/\./g, '').replace(/,/g, '')
-      const price = parseFloat(priceStr)
-      if (!isNaN(price) && price > 0) {
-        prices.push(price)
+  const pricePattern = /(?:Rp\.?\s*|IDR\s*|USD\s*|\$\s*)?([0-9]{1,3}(?:[.,\s][0-9]{3})*(?:[.,][0-9]{2})?)/gi
+
+  const extractedData = {
+    merchantName: '',
+    prices: [],
+    totalAmount: 0,
+    discountPercent: 0,
+    maxDiscount: 0,
+    fees: [],
+    subtotal: 0
+  }
+
+  const totalKeywords = ['total', 'grand total', 'amount', 'jumlah', 'bayar', 'pay']
+  const subtotalKeywords = ['subtotal', 'sub total', 'sub-total']
+  const discountKeywords = ['discount', 'diskon', 'potongan', 'promo', 'voucher']
+  const taxKeywords = ['tax', 'pajak', 'ppn', 'pb1', 'vat']
+  const serviceKeywords = ['service', 'layanan', 'servis']
+  const deliveryKeywords = ['delivery', 'ongkir', 'pengiriman', 'ongkos kirim']
+  const feeKeywords = ['fee', 'biaya', 'charge']
+
+  const normalizePrice = (priceStr) => {
+    let cleaned = priceStr.replace(/\s/g, '')
+
+    const dotCount = (cleaned.match(/\./g) || []).length
+    const commaCount = (cleaned.match(/,/g) || []).length
+
+    if (dotCount > 0 && commaCount > 0) {
+      if (cleaned.lastIndexOf('.') > cleaned.lastIndexOf(',')) {
+        cleaned = cleaned.replace(/,/g, '').replace(/\./g, '.')
+      } else {
+        cleaned = cleaned.replace(/\./g, '').replace(/,/g, '.')
+      }
+    } else if (dotCount > 1) {
+      cleaned = cleaned.replace(/\./g, '')
+    } else if (commaCount > 1) {
+      cleaned = cleaned.replace(/,/g, '')
+    } else if (commaCount === 1) {
+      const parts = cleaned.split(',')
+      if (parts[1].length === 2) {
+        cleaned = cleaned.replace(/,/g, '.')
+      } else {
+        cleaned = cleaned.replace(/,/g, '')
       }
     }
-  })
 
-  if (prices.length > 0) {
-    const largestAmount = Math.max(...prices)
-    totalAmount.value = largestAmount
+    const num = parseFloat(cleaned)
+    return isNaN(num) ? 0 : num
   }
 
-  if (lines.length > 0 && !billTitle.value) {
-    const firstLine = lines[0].substring(0, 50)
-    if (firstLine && !pricePattern.test(firstLine)) {
-      billTitle.value = firstLine
-    }
-  }
-
-  const discountKeywords = ['discount', 'diskon', 'potongan', 'off']
-  lines.forEach(line => {
+  lines.forEach((line, index) => {
     const lowerLine = line.toLowerCase()
-    discountKeywords.forEach(keyword => {
-      if (lowerLine.includes(keyword)) {
-        const percentMatch = line.match(/(\d+)%/)
-        if (percentMatch) {
-          discountPercent.value = parseInt(percentMatch[1])
+
+    if (index < 3 && !extractedData.merchantName && !pricePattern.test(line)) {
+      const hasNumbers = /\d/.test(line)
+      const hasAddress = /(jl\.|jalan|street|address|alamat)/i.test(line)
+      if (!hasNumbers || hasAddress) {
+        if (line.length >= 3 && line.length <= 50) {
+          extractedData.merchantName = line
         }
       }
-    })
-  })
+    }
 
-  const feeKeywords = ['tax', 'pajak', 'service', 'layanan', 'delivery', 'ongkir', 'pb1']
-  lines.forEach(line => {
-    const lowerLine = line.toLowerCase()
-    feeKeywords.forEach(keyword => {
-      if (lowerLine.includes(keyword)) {
-        const matches = line.matchAll(pricePattern)
-        for (const match of matches) {
-          const priceStr = match[1].replace(/\./g, '').replace(/,/g, '')
-          const price = parseFloat(priceStr)
-          if (!isNaN(price) && price > 0) {
-            const feeName = line.split(/[0-9]/)[0].trim()
-            if (fees.value[0].name === '' && fees.value[0].amount === 0) {
-              fees.value[0] = { name: feeName || 'Fee', amount: price }
-            } else {
-              fees.value.push({ name: feeName || 'Fee', amount: price })
-            }
-            break
+    const isTotalLine = totalKeywords.some(kw => lowerLine.includes(kw))
+    const isSubtotalLine = subtotalKeywords.some(kw => lowerLine.includes(kw))
+    const isDiscountLine = discountKeywords.some(kw => lowerLine.includes(kw))
+    const isTaxLine = taxKeywords.some(kw => lowerLine.includes(kw))
+    const isServiceLine = serviceKeywords.some(kw => lowerLine.includes(kw))
+    const isDeliveryLine = deliveryKeywords.some(kw => lowerLine.includes(kw))
+    const isFeeLine = feeKeywords.some(kw => lowerLine.includes(kw))
+
+    const percentMatch = line.match(/(\d+)\s*%/)
+
+    const matches = Array.from(line.matchAll(pricePattern))
+
+    matches.forEach(match => {
+      const price = normalizePrice(match[1])
+
+      if (price > 0) {
+        extractedData.prices.push({ line, price, lineIndex: index })
+
+        if (isTotalLine && price > extractedData.totalAmount) {
+          extractedData.totalAmount = price
+        }
+
+        if (isSubtotalLine && price > extractedData.subtotal) {
+          extractedData.subtotal = price
+        }
+
+        if (isDiscountLine) {
+          if (percentMatch) {
+            extractedData.discountPercent = parseInt(percentMatch[1])
+            extractedData.maxDiscount = price
+          } else {
+            extractedData.maxDiscount = price
           }
         }
+
+        if (isTaxLine) {
+          const feeName = line.split(/[0-9]/)[0].trim() || 'Tax'
+          extractedData.fees.push({ name: feeName, amount: price, type: 'tax' })
+        } else if (isServiceLine) {
+          const feeName = line.split(/[0-9]/)[0].trim() || 'Service Charge'
+          extractedData.fees.push({ name: feeName, amount: price, type: 'service' })
+        } else if (isDeliveryLine) {
+          const feeName = line.split(/[0-9]/)[0].trim() || 'Delivery Fee'
+          extractedData.fees.push({ name: feeName, amount: price, type: 'delivery' })
+        } else if (isFeeLine && !isTotalLine && !isSubtotalLine) {
+          const feeName = line.split(/[0-9]/)[0].trim() || 'Fee'
+          extractedData.fees.push({ name: feeName, amount: price, type: 'other' })
+        }
       }
     })
+
+    if (isDiscountLine && percentMatch && !extractedData.discountPercent) {
+      extractedData.discountPercent = parseInt(percentMatch[1])
+    }
   })
+
+  if (!extractedData.totalAmount && extractedData.prices.length > 0) {
+    const sortedPrices = extractedData.prices
+      .filter(p => p.price >= 1000)
+      .sort((a, b) => b.price - a.price)
+
+    if (sortedPrices.length > 0) {
+      extractedData.totalAmount = sortedPrices[0].price
+    }
+  }
+
+  if (!billTitle.value && extractedData.merchantName) {
+    billTitle.value = extractedData.merchantName
+  }
+
+  if (extractedData.totalAmount > 0) {
+    totalAmount.value = extractedData.totalAmount
+  }
+
+  if (extractedData.discountPercent > 0) {
+    discountPercent.value = extractedData.discountPercent
+  }
+
+  if (extractedData.maxDiscount > 0) {
+    maxDiscount.value = extractedData.maxDiscount
+  }
+
+  if (extractedData.fees.length > 0) {
+    const uniqueFees = []
+    const seenTypes = new Set()
+
+    extractedData.fees.forEach(fee => {
+      const key = `${fee.type}_${fee.amount}`
+      if (!seenTypes.has(key)) {
+        seenTypes.add(key)
+        uniqueFees.push(fee)
+      }
+    })
+
+    if (uniqueFees.length > 0) {
+      if (fees.value[0].name === '' && fees.value[0].amount === 0) {
+        fees.value = uniqueFees.map(f => ({ name: f.name, amount: f.amount }))
+      } else {
+        uniqueFees.forEach(fee => {
+          fees.value.push({ name: fee.name, amount: fee.amount })
+        })
+      }
+    }
+  }
+
+  console.log('Extracted Data:', extractedData)
 }
 
 const addParticipant = () => {
