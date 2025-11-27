@@ -29,7 +29,7 @@
       <div
         v-for="bill in bills"
         :key="bill.id"
-        class="border border-slate-200 dark:border-slate-700 rounded-xl p-5 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition bg-white dark:bg-slate-700/50 relative"
+        class="bill-card border border-slate-200 dark:border-slate-700 rounded-xl p-5 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition bg-white dark:bg-slate-700/50 relative"
       >
         <div class="flex flex-col sm:flex-row items-start sm:justify-between mb-3 gap-2">
           <div @click="toggleBill(bill)" class="cursor-pointer flex-1">
@@ -167,7 +167,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '../supabase.js'
 import BillParticipants from './BillParticipants.vue'
@@ -196,6 +196,7 @@ const selectedBill = ref(null)
 const billToDelete = ref(null)
 const showDeleteModal = ref(false)
 const isDeleting = ref(false)
+const billRefs = ref([])
 
 const getCurrencySymbol = (currency) => {
   if (currency) {
@@ -230,8 +231,39 @@ const formatDate = (dateString) => {
 }
 
 const toggleBill = (bill) => {
-  selectedBill.value = selectedBill.value?.id === bill.id ? null : bill
+  if (selectedBill.value?.id === bill.id) {
+    emit('refresh')
+    selectedBill.value = null
+  } else {
+    selectedBill.value = bill
+  }
 }
+
+const handleClickOutside = (event) => {
+  if (!selectedBill.value) return
+
+  const billElements = document.querySelectorAll('.bill-card')
+  let clickedInside = false
+
+  billElements.forEach(el => {
+    if (el.contains(event.target)) {
+      clickedInside = true
+    }
+  })
+
+  if (!clickedInside && !showDeleteModal.value) {
+    emit('refresh')
+    selectedBill.value = null
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 
 const viewPDF = (billId) => {
   router.push(`/bill/${billId}`)
