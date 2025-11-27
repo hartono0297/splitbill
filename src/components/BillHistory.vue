@@ -31,12 +31,6 @@
         :key="bill.id"
         class="border border-slate-200 dark:border-slate-700 rounded-xl p-5 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition bg-white dark:bg-slate-700/50 relative"
       >
-        <div v-if="bill.payment_status?.all_paid" class="absolute top-3 left-3 transform -rotate-12 pointer-events-none z-10">
-          <div class="border-4 border-green-600 rounded-lg px-3 py-1.5 bg-white/90 dark:bg-slate-800/90 shadow-lg">
-            <span class="text-xl font-black text-green-600 tracking-wider">PAID</span>
-          </div>
-        </div>
-
         <div class="flex flex-col sm:flex-row items-start sm:justify-between mb-3 gap-2">
           <div @click="toggleBill(bill)" class="cursor-pointer flex-1">
             <h3 class="text-lg font-semibold text-slate-800 dark:text-white">{{ bill.title }}</h3>
@@ -50,6 +44,11 @@
           <div class="text-left sm:text-right">
             <p class="text-sm text-slate-600 dark:text-slate-400">Final Total</p>
             <p class="text-xl font-bold text-green-600">{{ getCurrencySymbol(bill.currency) }} {{ formatRupiah(bill.final_amount, bill.currency) }}</p>
+            <div v-if="bill.payment_status?.all_paid" class="mt-1">
+              <div class="inline-block border-3 border-green-600 rounded px-2 py-0.5 bg-green-50 dark:bg-green-900/20">
+                <span class="text-sm font-black text-green-600 tracking-wide">PAID</span>
+              </div>
+            </div>
           </div>
         </div>
 

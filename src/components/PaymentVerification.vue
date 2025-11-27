@@ -139,6 +139,12 @@ const loadParticipants = async () => {
 const togglePayment = async (participant) => {
   const newPaidStatus = !participant.paid
 
+  participant.paid = newPaidStatus
+
+  setTimeout(() => {
+    emit('payment-updated')
+  }, 300)
+
   try {
     const { data: existing, error: selectError } = await supabase
       .from('participant_payments')
@@ -148,6 +154,7 @@ const togglePayment = async (participant) => {
 
     if (selectError) {
       console.error('Error checking existing payment:', selectError)
+      participant.paid = !newPaidStatus
       return
     }
 
@@ -174,15 +181,15 @@ const togglePayment = async (participant) => {
 
     if (result.error) {
       console.error('Error saving payment status:', result.error)
+      participant.paid = !newPaidStatus
+      emit('payment-updated')
       alert('Failed to save payment status. Please try again.')
       return
     }
-
-    participant.paid = newPaidStatus
-
-    emit('payment-updated')
   } catch (error) {
     console.error('Error updating payment status:', error)
+    participant.paid = !newPaidStatus
+    emit('payment-updated')
     alert('Failed to save payment status. Please try again.')
   }
 }
