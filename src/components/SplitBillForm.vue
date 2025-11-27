@@ -513,7 +513,7 @@ const parseReceiptText = (text) => {
 
   console.log('Parsed Lines:', lines)
 
-  const pricePattern = /(?:Rp\.?\s*|IDR\s*|USD\s*|\$\s*)?([0-9]{1,3}(?:[.,\s][0-9]{3})*(?:[.,][0-9]{2})?)/gi
+  const pricePattern = /(?:-\s*)?(?:Rp\.?\s*|IDR\s*|USD\s*|\$\s*)?([0-9]{1,3}(?:[.,\s][0-9]{3})*(?:[.,][0-9]{2})?)/gi
 
   const extractedData = {
     merchantName: '',
@@ -539,22 +539,40 @@ const parseReceiptText = (text) => {
     const dotCount = (cleaned.match(/\./g) || []).length
     const commaCount = (cleaned.match(/,/g) || []).length
 
-    if (dotCount > 0 && commaCount > 0) {
-      if (cleaned.lastIndexOf('.') > cleaned.lastIndexOf(',')) {
-        cleaned = cleaned.replace(/,/g, '').replace(/\./g, '.')
-      } else {
+    if (props.currencyFormat === 'IDR') {
+      if (dotCount > 0 && commaCount > 0) {
         cleaned = cleaned.replace(/\./g, '').replace(/,/g, '.')
+      } else if (dotCount >= 1) {
+        const parts = cleaned.split('.')
+        if (parts.length === 2 && parts[1].length === 2) {
+          cleaned = cleaned.replace(/\./g, '.')
+        } else {
+          cleaned = cleaned.replace(/\./g, '')
+        }
+      } else if (commaCount >= 1) {
+        const parts = cleaned.split(',')
+        if (parts.length === 2 && parts[1].length === 2) {
+          cleaned = cleaned.replace(/,/g, '.')
+        } else {
+          cleaned = cleaned.replace(/,/g, '')
+        }
       }
-    } else if (dotCount > 1) {
-      cleaned = cleaned.replace(/\./g, '')
-    } else if (commaCount > 1) {
-      cleaned = cleaned.replace(/,/g, '')
-    } else if (commaCount === 1) {
-      const parts = cleaned.split(',')
-      if (parts[1].length === 2) {
-        cleaned = cleaned.replace(/,/g, '.')
-      } else {
+    } else {
+      if (dotCount > 0 && commaCount > 0) {
+        if (cleaned.lastIndexOf('.') > cleaned.lastIndexOf(',')) {
+          cleaned = cleaned.replace(/,/g, '')
+        } else {
+          cleaned = cleaned.replace(/\./g, '').replace(/,/g, '.')
+        }
+      } else if (commaCount > 1) {
         cleaned = cleaned.replace(/,/g, '')
+      } else if (commaCount === 1) {
+        const parts = cleaned.split(',')
+        if (parts[1].length === 2) {
+          cleaned = cleaned.replace(/,/g, '.')
+        } else {
+          cleaned = cleaned.replace(/,/g, '')
+        }
       }
     }
 
@@ -589,6 +607,7 @@ const parseReceiptText = (text) => {
 
     matches.forEach(match => {
       const price = normalizePrice(match[1])
+      console.log(`Line: "${line}" | Raw: "${match[1]}" | Parsed: ${price}`)
 
       if (price > 0) {
         extractedData.prices.push({ line, price, lineIndex: index })
@@ -604,8 +623,8 @@ const parseReceiptText = (text) => {
         if (isDiscountLine) {
           if (percentMatch) {
             extractedData.discountPercent = parseInt(percentMatch[1])
-            extractedData.maxDiscount = price
-          } else {
+          }
+          if (price > extractedData.maxDiscount) {
             extractedData.maxDiscount = price
           }
         }
