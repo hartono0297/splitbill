@@ -44,9 +44,9 @@
           <div class="text-left sm:text-right">
             <p class="text-sm text-slate-600 dark:text-slate-400">Final Total</p>
             <p class="text-xl font-bold text-green-600">{{ getCurrencySymbol(bill.currency) }} {{ formatRupiah(bill.final_amount, bill.currency) }}</p>
-            <div v-if="bill.payment_status?.all_paid" class="mt-1">
-              <div class="inline-block border-3 border-green-600 rounded px-2 py-0.5 bg-green-50 dark:bg-green-900/20">
-                <span class="text-sm font-black text-green-600 tracking-wide">PAID</span>
+            <div v-if="bill.payment_status?.all_paid" class="mt-2 transform rotate-3">
+              <div class="inline-block border-4 border-green-600 rounded-lg px-4 py-1.5 bg-green-50 dark:bg-green-900/30 shadow-md">
+                <span class="text-lg font-black text-green-600 tracking-widest">PAID</span>
               </div>
             </div>
           </div>
@@ -115,7 +115,7 @@
             </div>
           </div>
 
-          <PaymentVerification :bill-id="bill.id" :currency-format="bill.currency || currencyFormat" @payment-updated="emit('refresh')" />
+          <PaymentVerification :bill-id="bill.id" :currency-format="bill.currency || currencyFormat" />
         </div>
       </div>
     </div>
