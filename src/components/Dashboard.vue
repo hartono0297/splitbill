@@ -246,10 +246,8 @@ const handleSignOut = async () => {
   emit('signout')
 }
 
-const handlePreferencesUpdated = (newCurrencyFormat, newDarkMode) => {
+const handlePreferencesUpdated = (newCurrencyFormat) => {
   currencyFormat.value = newCurrencyFormat
-  isDarkMode.value = newDarkMode
-  applyDarkMode(newDarkMode)
 }
 
 const handleThemeChanged = (newDarkMode) => {
