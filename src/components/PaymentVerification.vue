@@ -138,14 +138,20 @@ const togglePayment = async (participant) => {
   const newPaidStatus = !participant.paid
 
   try {
-    const { data: existing } = await supabase
+    const { data: existing, error: selectError } = await supabase
       .from('participant_payments')
       .select('id')
       .eq('participant_id', participant.id)
       .maybeSingle()
 
+    if (selectError) {
+      console.error('Error checking existing payment:', selectError)
+      return
+    }
+
+    let result
     if (existing) {
-      await supabase
+      result = await supabase
         .from('participant_payments')
         .update({
           paid: newPaidStatus,
@@ -154,7 +160,7 @@ const togglePayment = async (participant) => {
         })
         .eq('participant_id', participant.id)
     } else {
-      await supabase
+      result = await supabase
         .from('participant_payments')
         .insert({
           participant_id: participant.id,
@@ -164,9 +170,16 @@ const togglePayment = async (participant) => {
         })
     }
 
+    if (result.error) {
+      console.error('Error saving payment status:', result.error)
+      alert('Failed to save payment status. Please try again.')
+      return
+    }
+
     participant.paid = newPaidStatus
   } catch (error) {
     console.error('Error updating payment status:', error)
+    alert('Failed to save payment status. Please try again.')
   }
 }
 

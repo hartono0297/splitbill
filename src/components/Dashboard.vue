@@ -45,30 +45,28 @@
     <div class="max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
       <div class="grid lg:grid-cols-3 gap-4 sm:gap-6">
         <div class="lg:col-span-2">
-          <div class="flex gap-2 sm:gap-4 mb-6">
+          <div class="flex gap-2 sm:gap-4 mb-4 sm:mb-6">
             <button
               @click="activeTab = 'create'"
               :class="[
-                'flex-1 py-2 sm:py-3 px-3 sm:px-6 rounded-xl font-semibold transition text-sm sm:text-base',
+                'flex-1 py-2 sm:py-3 px-2 sm:px-6 rounded-lg sm:rounded-xl font-semibold transition text-xs sm:text-base',
                 activeTab === 'create'
                   ? 'bg-blue-500 text-white shadow-lg'
                   : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
               ]"
             >
-              <span class="hidden sm:inline">Create New Bill</span>
-              <span class="sm:hidden">Create</span>
+              Create
             </button>
             <button
               @click="activeTab = 'history'"
               :class="[
-                'flex-1 py-2 sm:py-3 px-3 sm:px-6 rounded-xl font-semibold transition text-sm sm:text-base',
+                'flex-1 py-2 sm:py-3 px-2 sm:px-6 rounded-lg sm:rounded-xl font-semibold transition text-xs sm:text-base',
                 activeTab === 'history'
                   ? 'bg-blue-500 text-white shadow-lg'
                   : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
               ]"
             >
-              <span class="hidden sm:inline">Bill History</span>
-              <span class="sm:hidden">History</span>
+              History
             </button>
           </div>
 
