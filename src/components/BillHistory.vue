@@ -31,9 +31,9 @@
         :key="bill.id"
         class="border border-slate-200 dark:border-slate-700 rounded-xl p-5 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition bg-white dark:bg-slate-700/50 relative"
       >
-        <div v-if="bill.payment_status?.all_paid" class="absolute top-3 right-3 transform rotate-12">
-          <div class="border-4 border-green-600 rounded-lg px-4 py-2 bg-white/90 dark:bg-slate-800/90">
-            <span class="text-2xl font-black text-green-600 tracking-wider">PAID</span>
+        <div v-if="bill.payment_status?.all_paid" class="absolute top-3 left-3 transform -rotate-12 pointer-events-none z-10">
+          <div class="border-4 border-green-600 rounded-lg px-3 py-1.5 bg-white/90 dark:bg-slate-800/90 shadow-lg">
+            <span class="text-xl font-black text-green-600 tracking-wider">PAID</span>
           </div>
         </div>
 
@@ -116,7 +116,7 @@
             </div>
           </div>
 
-          <PaymentVerification :bill-id="bill.id" :currency-format="bill.currency || currencyFormat" />
+          <PaymentVerification :bill-id="bill.id" :currency-format="bill.currency || currencyFormat" @payment-updated="emit('refresh')" />
         </div>
       </div>
     </div>

@@ -72,6 +72,8 @@ const props = defineProps({
   }
 })
 
+const emit = defineEmits(['payment-updated'])
+
 const participants = ref([])
 const loading = ref(false)
 
@@ -177,6 +179,8 @@ const togglePayment = async (participant) => {
     }
 
     participant.paid = newPaidStatus
+
+    emit('payment-updated')
   } catch (error) {
     console.error('Error updating payment status:', error)
     alert('Failed to save payment status. Please try again.')
