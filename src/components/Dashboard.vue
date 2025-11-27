@@ -4,14 +4,13 @@
       <div class="max-w-7xl mx-auto px-4 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2 sm:gap-3">
-            <div class="flex items-center gap-2">
-              <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-green-500 rounded-lg flex items-center justify-center shadow-lg">
-                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <div class="w-1 h-8 sm:h-10 bg-slate-800 dark:bg-slate-100 rounded-full"></div>
+                <div class="absolute top-0 -right-1 w-1 h-8 sm:h-10 bg-slate-400 dark:bg-slate-500 rounded-full opacity-60"></div>
               </div>
-              <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-green-600 dark:from-blue-400 dark:to-green-400 bg-clip-text text-transparent" style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: -0.02em;">
-                Split My Bills
+              <h1 class="text-xl sm:text-2xl font-light text-slate-800 dark:text-white tracking-tight" style="font-family: 'Helvetica Neue', 'Arial', sans-serif; letter-spacing: 0.03em;">
+                split<span class="font-extralight text-slate-600 dark:text-slate-400">my</span>bills
               </h1>
             </div>
             <span class="hidden sm:inline text-sm text-slate-500 dark:text-slate-400">{{ userEmail }}</span>
