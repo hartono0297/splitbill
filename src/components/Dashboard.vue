@@ -221,11 +221,16 @@ const loadBills = async () => {
 
         const { data: participantsData } = await supabase
           .from('participants')
+          .select('id')
+          .eq('bill_id', bill.id)
+
+        const { data: paymentsData } = await supabase
+          .from('participant_payments')
           .select('paid')
           .eq('bill_id', bill.id)
 
         const totalCount = participantsData?.length || 0
-        const paidCount = participantsData?.filter(p => p.paid).length || 0
+        const paidCount = paymentsData?.filter(p => p.paid).length || 0
 
         return {
           ...bill,
