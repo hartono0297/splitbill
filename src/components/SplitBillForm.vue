@@ -37,6 +37,41 @@
         </label>
       </div>
 
+      <div class="pt-4 border-t border-slate-200 dark:border-slate-600">
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+          Transfer To (Optional)
+        </label>
+        <div class="space-y-3">
+          <select
+            v-model="transferMethod"
+            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-slate-800 dark:text-white"
+          >
+            <option value="">Select payment method</option>
+            <option value="bank">Bank Account</option>
+            <option value="ovo">OVO</option>
+            <option value="dana">DANA</option>
+            <option value="gopay">GoPay</option>
+            <option value="other">Other</option>
+          </select>
+
+          <input
+            v-if="transferMethod"
+            v-model="transferAccount"
+            type="text"
+            :placeholder="transferMethod === 'bank' ? 'Account Number' : `${transferMethod.toUpperCase()} Number`"
+            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
+          />
+
+          <input
+            v-if="transferMethod === 'other'"
+            v-model="transferDescription"
+            type="text"
+            placeholder="Description (e.g., Cash, PayPal)"
+            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
+          />
+        </div>
+      </div>
+
       <div>
         <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
           Discount Voucher
@@ -173,7 +208,7 @@
         <div
           v-for="(participant, index) in participants"
           :key="index"
-          class="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl"
+          class="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl transition-colors"
         >
           <div>
             <p class="font-medium text-slate-800 dark:text-white">
@@ -182,7 +217,7 @@
             <p class="text-xs text-slate-600 dark:text-slate-400">owes</p>
           </div>
           <div class="text-right">
-            <p class="text-2xl font-bold text-green-600">
+            <p class="text-2xl font-bold text-green-600 dark:text-green-400">
               {{ getCurrencySymbol() }} {{ formatRupiah(getPersonFinalAmount(participant, index)) }}
             </p>
             <p v-if="useIndividualAmounts && actualDiscount > 0" class="text-xs text-slate-500 dark:text-slate-400 mt-1">
@@ -191,14 +226,14 @@
           </div>
         </div>
 
-        <div class="pt-4 border-t border-slate-200">
+        <div class="pt-4 border-t border-slate-200 dark:border-slate-700">
           <div class="flex justify-between items-center">
             <span class="text-slate-600 dark:text-slate-400 font-medium">Original Amount</span>
             <span class="text-xl font-bold text-slate-800 dark:text-white">{{ getCurrencySymbol() }} {{ formatRupiah(calculatedTotalAmount) }}</span>
           </div>
           <div v-if="actualDiscount > 0" class="flex justify-between items-center mt-2">
             <span class="text-sm text-slate-500 dark:text-slate-400">Discount ({{ discountPercent }}% max {{ getCurrencySymbol() }} {{ formatRupiah(maxDiscount) }})</span>
-            <span class="text-sm font-medium text-red-600">- {{ getCurrencySymbol() }} {{ formatRupiah(actualDiscount) }}</span>
+            <span class="text-sm font-medium text-red-600 dark:text-red-400">- {{ getCurrencySymbol() }} {{ formatRupiah(actualDiscount) }}</span>
           </div>
           <template v-for="(fee, index) in fees" :key="index">
             <div
@@ -206,12 +241,12 @@
               class="flex justify-between items-center mt-2"
             >
               <span class="text-sm text-slate-500 dark:text-slate-400">{{ fee.name }}</span>
-              <span class="text-sm font-medium text-green-600">+ {{ getCurrencySymbol() }} {{ formatRupiah(fee.amount) }}</span>
+              <span class="text-sm font-medium text-green-600 dark:text-green-400">+ {{ getCurrencySymbol() }} {{ formatRupiah(fee.amount) }}</span>
             </div>
           </template>
-          <div class="flex justify-between items-center mt-3 pt-3 border-t border-slate-200">
+          <div class="flex justify-between items-center mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
             <span class="text-slate-600 dark:text-slate-400 font-medium">Final Total</span>
-            <span class="text-2xl font-bold text-green-600">{{ getCurrencySymbol() }} {{ formatRupiah(finalAmount) }}</span>
+            <span class="text-2xl font-bold text-green-600 dark:text-green-400">{{ getCurrencySymbol() }} {{ formatRupiah(finalAmount) }}</span>
           </div>
         </div>
       </div>
@@ -280,6 +315,9 @@ const maxDiscount = ref(0)
 const fees = ref([{ name: '', amount: 0 }])
 const useIndividualAmounts = ref(false)
 const participants = ref([{ name: '', amount: 0 }, { name: '', amount: 0 }])
+const transferMethod = ref('')
+const transferAccount = ref('')
+const transferDescription = ref('')
 const isSaving = ref(false)
 const savedMessage = ref('')
 const errorMessage = ref('')
@@ -427,17 +465,27 @@ const saveBill = async () => {
       throw new Error('Not authenticated')
     }
 
+    const billInsertData = {
+      user_id: user.id,
+      title: billTitle.value,
+      total_amount: calculatedTotalAmount.value,
+      discount_percent: discountPercent.value || 0,
+      max_discount: maxDiscount.value || 0,
+      final_amount: finalAmount.value,
+      currency: props.currencyFormat
+    }
+
+    if (transferMethod.value) {
+      billInsertData.transfer_method = transferMethod.value
+      billInsertData.transfer_account = transferAccount.value
+      if (transferMethod.value === 'other') {
+        billInsertData.transfer_description = transferDescription.value
+      }
+    }
+
     const { data: billData, error: billError } = await supabase
       .from('bills')
-      .insert({
-        user_id: user.id,
-        title: billTitle.value,
-        total_amount: calculatedTotalAmount.value,
-        discount_percent: discountPercent.value || 0,
-        max_discount: maxDiscount.value || 0,
-        final_amount: finalAmount.value,
-        currency: props.currencyFormat
-      })
+      .insert(billInsertData)
       .select()
       .maybeSingle()
 
@@ -499,5 +547,8 @@ const resetBill = () => {
   fees.value = [{ name: '', amount: 0 }]
   useIndividualAmounts.value = false
   participants.value = [{ name: '', amount: 0 }, { name: '', amount: 0 }]
+  transferMethod.value = ''
+  transferAccount.value = ''
+  transferDescription.value = ''
 }
 </script>

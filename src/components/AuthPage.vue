@@ -1,5 +1,8 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center px-4 transition-colors">
+    <div class="absolute top-4 right-4">
+      <DarkModeToggle />
+    </div>
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 w-full max-w-md transition-colors">
       <div class="text-center mb-8">
         <h1 class="text-4xl font-bold text-slate-800 dark:text-white mb-2">Split Bill</h1>
@@ -66,6 +69,7 @@
 <script setup>
 import { ref } from 'vue'
 import { supabase } from '../supabase.js'
+import DarkModeToggle from './DarkModeToggle.vue'
 
 const emit = defineEmits(['authenticated'])
 

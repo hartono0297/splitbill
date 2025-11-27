@@ -3,16 +3,19 @@
     <nav class="bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700 transition-colors">
       <div class="max-w-7xl mx-auto px-4 py-4">
         <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Split Bill</h1>
-            <span class="text-sm text-slate-500 dark:text-slate-400">{{ userEmail }}</span>
+          <div class="flex items-center gap-2 sm:gap-3">
+            <h1 class="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white">Split Bill</h1>
+            <span class="hidden sm:inline text-sm text-slate-500 dark:text-slate-400">{{ userEmail }}</span>
           </div>
-          <button
-            @click="handleSignOut"
-            class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition font-medium"
-          >
-            Sign Out
-          </button>
+          <div class="flex items-center gap-2">
+            <DarkModeToggle :user-id="user.id" @theme-changed="handleThemeChanged" />
+            <button
+              @click="handleSignOut"
+              class="px-3 sm:px-4 py-2 text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition font-medium text-sm sm:text-base"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
       </div>
     </nav>
@@ -20,33 +23,35 @@
     <div class="max-w-7xl mx-auto px-4 py-8">
       <div class="grid lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2">
-          <div class="flex gap-4 mb-6">
+          <div class="flex gap-2 sm:gap-4 mb-6">
             <button
               @click="activeTab = 'create'"
               :class="[
-                'flex-1 py-3 px-6 rounded-xl font-semibold transition',
+                'flex-1 py-2 sm:py-3 px-3 sm:px-6 rounded-xl font-semibold transition text-sm sm:text-base',
                 activeTab === 'create'
                   ? 'bg-blue-500 text-white shadow-lg'
                   : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
               ]"
             >
-              Create New Bill
+              <span class="hidden sm:inline">Create New Bill</span>
+              <span class="sm:hidden">Create</span>
             </button>
             <button
               @click="activeTab = 'history'"
               :class="[
-                'flex-1 py-3 px-6 rounded-xl font-semibold transition',
+                'flex-1 py-2 sm:py-3 px-3 sm:px-6 rounded-xl font-semibold transition text-sm sm:text-base',
                 activeTab === 'history'
                   ? 'bg-blue-500 text-white shadow-lg'
                   : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
               ]"
             >
-              Bill History
+              <span class="hidden sm:inline">Bill History</span>
+              <span class="sm:hidden">History</span>
             </button>
             <button
               @click="activeTab = 'profile'"
               :class="[
-                'flex-1 py-3 px-6 rounded-xl font-semibold transition',
+                'flex-1 py-2 sm:py-3 px-3 sm:px-6 rounded-xl font-semibold transition text-sm sm:text-base',
                 activeTab === 'profile'
                   ? 'bg-blue-500 text-white shadow-lg'
                   : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
@@ -99,6 +104,7 @@ import { supabase } from '../supabase.js'
 import SplitBillForm from './SplitBillForm.vue'
 import BillHistory from './BillHistory.vue'
 import UserProfile from './UserProfile.vue'
+import DarkModeToggle from './DarkModeToggle.vue'
 
 const emit = defineEmits(['signout'])
 
@@ -233,6 +239,10 @@ const handlePreferencesUpdated = (newCurrencyFormat, newDarkMode) => {
   currencyFormat.value = newCurrencyFormat
   isDarkMode.value = newDarkMode
   applyDarkMode(newDarkMode)
+}
+
+const handleThemeChanged = (newDarkMode) => {
+  isDarkMode.value = newDarkMode
 }
 
 onMounted(() => {

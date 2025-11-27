@@ -31,12 +31,12 @@
         :key="bill.id"
         class="border border-slate-200 dark:border-slate-700 rounded-xl p-5 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition bg-white dark:bg-slate-700/50"
       >
-        <div class="flex items-start justify-between mb-3">
+        <div class="flex flex-col sm:flex-row items-start sm:justify-between mb-3 gap-2">
           <div @click="toggleBill(bill)" class="cursor-pointer flex-1">
             <h3 class="text-lg font-semibold text-slate-800 dark:text-white">{{ bill.title }}</h3>
             <p class="text-sm text-slate-500 dark:text-slate-400">{{ formatDate(bill.created_at) }}</p>
           </div>
-          <div class="text-right">
+          <div class="text-left sm:text-right">
             <p class="text-sm text-slate-600 dark:text-slate-400">Final Total</p>
             <p class="text-xl font-bold text-green-600">{{ getCurrencySymbol(bill.currency) }} {{ formatRupiah(bill.final_amount, bill.currency) }}</p>
           </div>
@@ -65,7 +65,7 @@
           </div>
         </div>
 
-        <div class="flex gap-2">
+        <div class="flex flex-col sm:flex-row gap-2">
           <button
             @click="viewPDF(bill.id)"
             class="flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition flex items-center justify-center gap-2"
@@ -73,24 +73,38 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            View PDF
+            <span class="hidden sm:inline">View PDF</span>
+            <span class="sm:hidden">View</span>
           </button>
           <button
             @click="confirmDelete(bill)"
-            class="py-2 px-4 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition flex items-center justify-center gap-2"
+            class="sm:flex-none py-2 px-4 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition flex items-center justify-center gap-2"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
-            Delete
+            <span class="sm:hidden">Delete</span>
           </button>
         </div>
 
-        <div v-if="selectedBill?.id === bill.id" class="mt-4 pt-4 border-t border-slate-200">
-          <p class="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Participants:</p>
-          <div class="space-y-2">
-            <BillParticipants :bill-id="bill.id" />
+        <div v-if="selectedBill?.id === bill.id" class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-600 space-y-4">
+          <div>
+            <p class="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Participants:</p>
+            <div class="space-y-2">
+              <BillParticipants :bill-id="bill.id" />
+            </div>
           </div>
+
+          <div v-if="bill.transfer_method" class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 sm:p-4">
+            <p class="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Transfer Details:</p>
+            <div class="text-sm text-slate-600 dark:text-slate-400">
+              <p><span class="font-medium">Method:</span> {{ formatTransferMethod(bill.transfer_method) }}</p>
+              <p v-if="bill.transfer_account"><span class="font-medium">Account:</span> {{ bill.transfer_account }}</p>
+              <p v-if="bill.transfer_description"><span class="font-medium">Description:</span> {{ bill.transfer_description }}</p>
+            </div>
+          </div>
+
+          <PaymentVerification :bill-id="bill.id" :currency-format="bill.currency || currencyFormat" />
         </div>
       </div>
     </div>
@@ -146,6 +160,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '../supabase.js'
 import BillParticipants from './BillParticipants.vue'
+import PaymentVerification from './PaymentVerification.vue'
 
 const router = useRouter()
 
@@ -219,6 +234,17 @@ const confirmDelete = (bill) => {
 const cancelDelete = () => {
   billToDelete.value = null
   showDeleteModal.value = false
+}
+
+const formatTransferMethod = (method) => {
+  const methods = {
+    bank: 'Bank Account',
+    ovo: 'OVO',
+    dana: 'DANA',
+    gopay: 'GoPay',
+    other: 'Other'
+  }
+  return methods[method] || method
 }
 
 const deleteBill = async () => {

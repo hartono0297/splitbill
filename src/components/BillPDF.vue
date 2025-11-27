@@ -64,6 +64,15 @@
           </div>
         </div>
 
+        <div v-if="bill.transfer_method" class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <h3 class="text-md font-semibold text-slate-700 mb-2">Transfer To:</h3>
+          <div class="text-sm text-slate-600 space-y-1">
+            <p><span class="font-medium">Method:</span> {{ formatTransferMethod(bill.transfer_method) }}</p>
+            <p v-if="bill.transfer_account"><span class="font-medium">Account:</span> {{ bill.transfer_account }}</p>
+            <p v-if="bill.transfer_description"><span class="font-medium">Description:</span> {{ bill.transfer_description }}</p>
+          </div>
+        </div>
+
         <div class="border-t border-slate-200 pt-6">
           <div class="space-y-3">
             <div class="flex justify-between items-center text-slate-700">
@@ -180,7 +189,22 @@ const formatDate = (dateString) => {
 
 const calculateDiscount = () => {
   if (!bill.value) return 0
-  return bill.value.total_amount - bill.value.final_amount
+  const discount = (bill.value.total_amount * bill.value.discount_percent) / 100
+  if (bill.value.max_discount > 0) {
+    return Math.min(discount, bill.value.max_discount)
+  }
+  return discount
+}
+
+const formatTransferMethod = (method) => {
+  const methods = {
+    bank: 'Bank Account',
+    ovo: 'OVO',
+    dana: 'DANA',
+    gopay: 'GoPay',
+    other: 'Other'
+  }
+  return methods[method] || method
 }
 
 const goBack = () => {
