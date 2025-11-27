@@ -374,12 +374,22 @@ const calculatedTotalAmount = computed(() => {
 })
 
 const actualDiscount = computed(() => {
-  if (!discountPercent.value || calculatedTotalAmount.value <= 0) return 0
-  const calculatedDiscount = (calculatedTotalAmount.value * discountPercent.value) / 100
-  if (maxDiscount.value > 0) {
+  if (calculatedTotalAmount.value <= 0) return 0
+
+  if (maxDiscount.value > 0 && discountPercent.value > 0) {
+    const calculatedDiscount = (calculatedTotalAmount.value * discountPercent.value) / 100
     return Math.min(calculatedDiscount, maxDiscount.value)
   }
-  return calculatedDiscount
+
+  if (maxDiscount.value > 0) {
+    return maxDiscount.value
+  }
+
+  if (discountPercent.value > 0) {
+    return (calculatedTotalAmount.value * discountPercent.value) / 100
+  }
+
+  return 0
 })
 
 const totalFees = computed(() => {
