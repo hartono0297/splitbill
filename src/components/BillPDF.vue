@@ -54,15 +54,36 @@
             <div
               v-for="participant in participants"
               :key="participant.id"
-              class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600 transition-colors"
+              class="bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600 transition-colors overflow-hidden"
             >
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-blue-500 dark:bg-blue-600 flex items-center justify-center text-white font-semibold">
-                  {{ participant.name.charAt(0).toUpperCase() }}
+              <div class="flex items-center justify-between p-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-blue-500 dark:bg-blue-600 flex items-center justify-center text-white font-semibold">
+                    {{ participant.name.charAt(0).toUpperCase() }}
+                  </div>
+                  <span class="font-medium text-slate-800 dark:text-slate-200">{{ participant.name }}</span>
                 </div>
-                <span class="font-medium text-slate-800 dark:text-slate-200">{{ participant.name }}</span>
+                <span class="text-lg font-bold text-green-600 dark:text-green-400">Rp {{ formatRupiah(participant.amount) }}</span>
               </div>
-              <span class="text-lg font-bold text-green-600 dark:text-green-400">Rp {{ formatRupiah(participant.amount) }}</span>
+
+              <div class="px-4 pb-4 pt-2 border-t border-slate-200 dark:border-slate-600">
+                <div class="space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
+                  <div class="flex justify-between">
+                    <span>Share of Original Amount</span>
+                    <span>Rp {{ formatRupiah(participant.amount * bill.total_amount / bill.final_amount) }}</span>
+                  </div>
+
+                  <div v-if="bill.discount_percent > 0" class="flex justify-between text-red-600 dark:text-red-400">
+                    <span>Discount ({{ bill.discount_percent }}%)</span>
+                    <span>- Rp {{ formatRupiah(calculateParticipantDiscount(participant.amount)) }}</span>
+                  </div>
+
+                  <div v-if="fees.length > 0" v-for="fee in fees" :key="fee.id" class="flex justify-between text-green-600 dark:text-green-400">
+                    <span>{{ fee.name }}</span>
+                    <span>+ Rp {{ formatRupiah(calculateParticipantFee(participant.amount, fee.amount)) }}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -210,6 +231,18 @@ const formatTransferMethod = (method) => {
     other: 'Other'
   }
   return methods[method] || method
+}
+
+const calculateParticipantDiscount = (participantAmount) => {
+  if (!bill.value) return 0
+  const totalDiscount = (bill.value.total_amount * bill.value.discount_percent) / 100
+  const cappedDiscount = bill.value.max_discount > 0 ? Math.min(totalDiscount, bill.value.max_discount) : totalDiscount
+  return (participantAmount / bill.value.final_amount) * cappedDiscount
+}
+
+const calculateParticipantFee = (participantAmount, feeAmount) => {
+  if (!bill.value) return 0
+  return (participantAmount / bill.value.final_amount) * feeAmount
 }
 
 const goBack = () => {
