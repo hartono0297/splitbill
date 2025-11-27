@@ -1,26 +1,25 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 transition-colors">
     <nav class="bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700 transition-colors">
-      <div class="max-w-7xl mx-auto px-4 py-4">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2 sm:gap-3">
-            <div class="flex items-center gap-3">
-              <div class="relative">
-                <div class="w-1 h-8 sm:h-10 bg-slate-800 dark:bg-slate-100 rounded-full"></div>
-                <div class="absolute top-0 -right-1 w-1 h-8 sm:h-10 bg-slate-400 dark:bg-slate-500 rounded-full opacity-60"></div>
+      <div class="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0 flex-shrink">
+            <div class="flex items-center gap-2">
+              <div class="relative flex-shrink-0">
+                <div class="w-1 h-7 sm:h-10 bg-slate-800 dark:bg-slate-100 rounded-full"></div>
+                <div class="absolute top-0 -right-1 w-1 h-7 sm:h-10 bg-slate-400 dark:bg-slate-500 rounded-full opacity-60"></div>
               </div>
-              <h1 class="text-xl sm:text-2xl font-light text-slate-800 dark:text-white tracking-tight" style="font-family: 'Helvetica Neue', 'Arial', sans-serif; letter-spacing: 0.03em;">
+              <h1 class="text-base sm:text-2xl font-light text-slate-800 dark:text-white tracking-tight truncate" style="font-family: 'Helvetica Neue', 'Arial', sans-serif; letter-spacing: 0.03em;">
                 split<span class="font-extralight text-slate-600 dark:text-slate-400">my</span>bills
               </h1>
             </div>
-            <span class="hidden sm:inline text-sm text-slate-500 dark:text-slate-400">{{ userEmail }}</span>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             <DarkModeToggle :user-id="user.id" @theme-changed="handleThemeChanged" />
             <button
               @click="activeTab = 'profile'"
               :class="[
-                'px-3 sm:px-4 py-2 rounded-lg transition font-medium text-sm sm:text-base flex items-center gap-2',
+                'p-2 sm:px-4 sm:py-2 rounded-lg transition font-medium text-sm sm:text-base flex items-center gap-2',
                 activeTab === 'profile'
                   ? 'bg-blue-500 text-white'
                   : 'text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700'
@@ -33,9 +32,10 @@
             </button>
             <button
               @click="handleSignOut"
-              class="px-3 sm:px-4 py-2 text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition font-medium text-sm sm:text-base"
+              class="p-2 sm:px-4 sm:py-2 text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition font-medium text-sm sm:text-base whitespace-nowrap"
             >
-              Sign Out
+              <span class="hidden sm:inline">Sign Out</span>
+              <span class="sm:hidden">Out</span>
             </button>
           </div>
         </div>
