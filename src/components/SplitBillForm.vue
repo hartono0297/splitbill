@@ -1,5 +1,36 @@
 <template>
   <div class="bg-white dark:bg-slate-800 rounded-lg sm:rounded-2xl shadow-lg p-3 sm:p-6 mb-3 sm:mb-6 transition-colors">
+    <div class="mb-4 sm:mb-6">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-sm sm:text-base font-semibold text-slate-800 dark:text-white">Scan Bill</h3>
+        <button
+          @click="triggerFileInput"
+          class="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs sm:text-sm font-medium rounded-lg transition"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          Scan Receipt
+        </button>
+      </div>
+      <input
+        ref="fileInput"
+        type="file"
+        accept="image/*"
+        capture="environment"
+        @change="handleImageUpload"
+        class="hidden"
+      />
+      <div v-if="isProcessing" class="flex items-center justify-center gap-2 py-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+        <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+        <span class="text-xs sm:text-sm text-blue-700 dark:text-blue-300">Processing image...</span>
+      </div>
+      <div v-if="ocrError" class="py-2 px-3 bg-red-50 dark:bg-red-900/20 rounded-lg text-xs sm:text-sm text-red-700 dark:text-red-300">
+        {{ ocrError }}
+      </div>
+    </div>
+
     <div class="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
       <div>
         <label class="block text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 sm:mb-2">
@@ -282,9 +313,9 @@
 
       <button
         @click="resetBill"
-        class="flex-1 py-4 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-semibold rounded-xl transition flex items-center justify-center gap-2"
+        class="flex-1 py-2.5 sm:py-4 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 text-sm sm:text-base font-semibold rounded-lg sm:rounded-xl transition flex items-center justify-center gap-2"
       >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
         </svg>
         Reset
@@ -305,6 +336,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '../supabase.js'
+import { createWorker } from 'tesseract.js'
 
 const router = useRouter()
 const emit = defineEmits(['bill-saved'])
@@ -330,6 +362,9 @@ const transferDescription = ref('')
 const isSaving = ref(false)
 const savedMessage = ref('')
 const errorMessage = ref('')
+const isProcessing = ref(false)
+const ocrError = ref('')
+const fileInput = ref(null)
 
 const calculatedTotalAmount = computed(() => {
   if (useIndividualAmounts.value) {
@@ -436,6 +471,98 @@ const handleFeeAmountInput = (event, index) => {
   const cleaned = event.target.value.replace(/[^\d]/g, '')
   fees.value[index].amount = cleaned === '' ? 0 : parseFloat(cleaned)
   event.target.value = formatNumberInput(fees.value[index].amount)
+}
+
+const triggerFileInput = () => {
+  fileInput.value.click()
+}
+
+const handleImageUpload = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  isProcessing.value = true
+  ocrError.value = ''
+
+  try {
+    const worker = await createWorker('eng')
+    const { data: { text } } = await worker.recognize(file)
+    await worker.terminate()
+
+    parseReceiptText(text)
+  } catch (error) {
+    console.error('OCR Error:', error)
+    ocrError.value = 'Failed to process image. Please try again.'
+  } finally {
+    isProcessing.value = false
+    event.target.value = ''
+  }
+}
+
+const parseReceiptText = (text) => {
+  const lines = text.split('\n').map(line => line.trim()).filter(line => line)
+
+  const pricePattern = /(?:Rp\.?|IDR|USD|\$)?\s*([0-9]{1,3}(?:[.,][0-9]{3})*(?:[.,][0-9]{2})?)/gi
+  const prices = []
+
+  lines.forEach(line => {
+    const matches = line.matchAll(pricePattern)
+    for (const match of matches) {
+      const priceStr = match[1].replace(/\./g, '').replace(/,/g, '')
+      const price = parseFloat(priceStr)
+      if (!isNaN(price) && price > 0) {
+        prices.push(price)
+      }
+    }
+  })
+
+  if (prices.length > 0) {
+    const largestAmount = Math.max(...prices)
+    totalAmount.value = largestAmount
+  }
+
+  if (lines.length > 0 && !billTitle.value) {
+    const firstLine = lines[0].substring(0, 50)
+    if (firstLine && !pricePattern.test(firstLine)) {
+      billTitle.value = firstLine
+    }
+  }
+
+  const discountKeywords = ['discount', 'diskon', 'potongan', 'off']
+  lines.forEach(line => {
+    const lowerLine = line.toLowerCase()
+    discountKeywords.forEach(keyword => {
+      if (lowerLine.includes(keyword)) {
+        const percentMatch = line.match(/(\d+)%/)
+        if (percentMatch) {
+          discountPercent.value = parseInt(percentMatch[1])
+        }
+      }
+    })
+  })
+
+  const feeKeywords = ['tax', 'pajak', 'service', 'layanan', 'delivery', 'ongkir', 'pb1']
+  lines.forEach(line => {
+    const lowerLine = line.toLowerCase()
+    feeKeywords.forEach(keyword => {
+      if (lowerLine.includes(keyword)) {
+        const matches = line.matchAll(pricePattern)
+        for (const match of matches) {
+          const priceStr = match[1].replace(/\./g, '').replace(/,/g, '')
+          const price = parseFloat(priceStr)
+          if (!isNaN(price) && price > 0) {
+            const feeName = line.split(/[0-9]/)[0].trim()
+            if (fees.value[0].name === '' && fees.value[0].amount === 0) {
+              fees.value[0] = { name: feeName || 'Fee', amount: price }
+            } else {
+              fees.value.push({ name: feeName || 'Fee', amount: price })
+            }
+            break
+          }
+        }
+      }
+    })
+  })
 }
 
 const addParticipant = () => {
