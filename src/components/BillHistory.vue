@@ -242,16 +242,10 @@ const toggleBill = (bill) => {
 const handleClickOutside = (event) => {
   if (!selectedBill.value) return
 
-  const billElements = document.querySelectorAll('.bill-card')
-  let clickedInside = false
+  const clickedElement = event.target
+  const isClickOnBillCard = clickedElement.closest('.bill-card')
 
-  billElements.forEach(el => {
-    if (el.contains(event.target)) {
-      clickedInside = true
-    }
-  })
-
-  if (!clickedInside && !showDeleteModal.value) {
+  if (!isClickOnBillCard && !showDeleteModal.value) {
     emit('refresh')
     selectedBill.value = null
   }
