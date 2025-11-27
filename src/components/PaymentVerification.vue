@@ -15,7 +15,7 @@
       >
         <div class="flex items-center gap-3 flex-1">
           <button
-            @click="togglePayment(participant)"
+            @click.stop="togglePayment(participant)"
             class="flex-shrink-0 w-6 h-6 rounded border-2 transition-all flex items-center justify-center"
             :class="participant.paid ? 'bg-green-500 border-green-500' : 'border-slate-300 dark:border-slate-500 hover:border-green-500'"
           >
