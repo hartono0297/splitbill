@@ -660,13 +660,16 @@ const parseReceiptText = (text) => {
     }
   })
 
-  if (!extractedData.totalAmount && extractedData.prices.length > 0) {
-    const sortedPrices = extractedData.prices
-      .filter(p => p.price >= 1000)
+  if (extractedData.subtotal > 0) {
+    extractedData.totalAmount = extractedData.subtotal
+  } else if (!extractedData.totalAmount && extractedData.prices.length > 0) {
+    const feeAmounts = new Set(extractedData.fees.map(f => f.amount))
+    const nonFeePrices = extractedData.prices
+      .filter(p => p.price >= 1000 && !feeAmounts.has(p.price))
       .sort((a, b) => b.price - a.price)
 
-    if (sortedPrices.length > 0) {
-      extractedData.totalAmount = sortedPrices[0].price
+    if (nonFeePrices.length > 0) {
+      extractedData.totalAmount = nonFeePrices[0].price
     }
   }
 
