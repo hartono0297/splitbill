@@ -5,7 +5,16 @@
     </div>
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 w-full max-w-md transition-colors">
       <div class="text-center mb-8">
-        <h1 class="text-4xl font-bold text-slate-800 dark:text-white mb-2">Split Bill</h1>
+        <div class="flex items-center justify-center gap-3 mb-3">
+          <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-green-500 rounded-xl flex items-center justify-center shadow-lg">
+            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-green-600 dark:from-blue-400 dark:to-green-400 bg-clip-text text-transparent" style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: -0.02em;">
+            Split My Bills
+          </h1>
+        </div>
         <p class="text-slate-600 dark:text-slate-400">{{ isLogin ? 'Welcome back!' : 'Create your account' }}</p>
       </div>
 
