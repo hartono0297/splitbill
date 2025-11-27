@@ -233,6 +233,7 @@ const formatDate = (dateString) => {
 const toggleBill = (bill) => {
   if (selectedBill.value?.id === bill.id) {
     selectedBill.value = null
+    emit('refresh')
   } else {
     selectedBill.value = bill
   }
