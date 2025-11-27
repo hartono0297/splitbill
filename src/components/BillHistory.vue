@@ -97,8 +97,9 @@
 
           <div v-if="bill.transfer_method" class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 sm:p-4">
             <p class="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Transfer Details:</p>
-            <div class="text-sm text-slate-600 dark:text-slate-400">
+            <div class="text-sm text-slate-600 dark:text-slate-400 space-y-1">
               <p><span class="font-medium">Method:</span> {{ formatTransferMethod(bill.transfer_method) }}</p>
+              <p v-if="bill.bank_name"><span class="font-medium">Bank:</span> {{ bill.bank_name }}</p>
               <p v-if="bill.transfer_account"><span class="font-medium">Account:</span> {{ bill.transfer_account }}</p>
               <p v-if="bill.transfer_description"><span class="font-medium">Description:</span> {{ bill.transfer_description }}</p>
             </div>

@@ -1,20 +1,20 @@
 <template>
   <div v-if="loading" class="text-center py-4">
-    <p class="text-sm text-slate-500">Loading participants...</p>
+    <p class="text-sm text-slate-500 dark:text-slate-400">Loading participants...</p>
   </div>
 
   <div v-else-if="participants.length === 0" class="text-center py-4">
-    <p class="text-sm text-slate-500">No participants found</p>
+    <p class="text-sm text-slate-500 dark:text-slate-400">No participants found</p>
   </div>
 
   <div v-else class="space-y-2">
     <div
       v-for="participant in participants"
       :key="participant.id"
-      class="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
+      class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-lg transition-colors"
     >
-      <span class="text-sm font-medium text-slate-700">{{ participant.name }}</span>
-      <span class="text-sm font-bold text-green-600">Rp {{ formatRupiah(participant.amount) }}</span>
+      <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ participant.name }}</span>
+      <span class="text-sm font-bold text-green-600 dark:text-green-400">Rp {{ formatRupiah(participant.amount) }}</span>
     </div>
   </div>
 </template>

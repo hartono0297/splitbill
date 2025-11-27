@@ -55,6 +55,14 @@
           </select>
 
           <input
+            v-if="transferMethod === 'bank'"
+            v-model="bankName"
+            type="text"
+            placeholder="Bank Name (e.g., BCA, Mandiri, BNI)"
+            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
+          />
+
+          <input
             v-if="transferMethod"
             v-model="transferAccount"
             type="text"
@@ -316,6 +324,7 @@ const fees = ref([{ name: '', amount: 0 }])
 const useIndividualAmounts = ref(false)
 const participants = ref([{ name: '', amount: 0 }, { name: '', amount: 0 }])
 const transferMethod = ref('')
+const bankName = ref('')
 const transferAccount = ref('')
 const transferDescription = ref('')
 const isSaving = ref(false)
@@ -478,6 +487,9 @@ const saveBill = async () => {
     if (transferMethod.value) {
       billInsertData.transfer_method = transferMethod.value
       billInsertData.transfer_account = transferAccount.value
+      if (transferMethod.value === 'bank') {
+        billInsertData.bank_name = bankName.value
+      }
       if (transferMethod.value === 'other') {
         billInsertData.transfer_description = transferDescription.value
       }
@@ -548,6 +560,7 @@ const resetBill = () => {
   useIndividualAmounts.value = false
   participants.value = [{ name: '', amount: 0 }, { name: '', amount: 0 }]
   transferMethod.value = ''
+  bankName.value = ''
   transferAccount.value = ''
   transferDescription.value = ''
 }
