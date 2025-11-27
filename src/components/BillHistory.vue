@@ -29,12 +29,23 @@
       <div
         v-for="bill in bills"
         :key="bill.id"
-        class="border border-slate-200 dark:border-slate-700 rounded-xl p-5 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition bg-white dark:bg-slate-700/50"
+        class="border border-slate-200 dark:border-slate-700 rounded-xl p-5 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition bg-white dark:bg-slate-700/50 relative"
       >
+        <div v-if="bill.payment_status?.all_paid" class="absolute top-3 right-3 transform rotate-12">
+          <div class="border-4 border-green-600 rounded-lg px-4 py-2 bg-white/90 dark:bg-slate-800/90">
+            <span class="text-2xl font-black text-green-600 tracking-wider">PAID</span>
+          </div>
+        </div>
+
         <div class="flex flex-col sm:flex-row items-start sm:justify-between mb-3 gap-2">
           <div @click="toggleBill(bill)" class="cursor-pointer flex-1">
             <h3 class="text-lg font-semibold text-slate-800 dark:text-white">{{ bill.title }}</h3>
             <p class="text-sm text-slate-500 dark:text-slate-400">{{ formatDate(bill.created_at) }}</p>
+            <div v-if="bill.payment_status" class="mt-1 text-xs text-slate-600 dark:text-slate-400">
+              <span :class="bill.payment_status.all_paid ? 'text-green-600 dark:text-green-400 font-medium' : ''">
+                {{ bill.payment_status.paid_count }} / {{ bill.payment_status.total_count }} paid
+              </span>
+            </div>
           </div>
           <div class="text-left sm:text-right">
             <p class="text-sm text-slate-600 dark:text-slate-400">Final Total</p>

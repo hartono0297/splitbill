@@ -219,9 +219,22 @@ const loadBills = async () => {
           .eq('bill_id', bill.id)
           .order('created_at', { ascending: true })
 
+        const { data: participantsData } = await supabase
+          .from('participants')
+          .select('paid')
+          .eq('bill_id', bill.id)
+
+        const totalCount = participantsData?.length || 0
+        const paidCount = participantsData?.filter(p => p.paid).length || 0
+
         return {
           ...bill,
-          fees: feesData || []
+          fees: feesData || [],
+          payment_status: {
+            total_count: totalCount,
+            paid_count: paidCount,
+            all_paid: totalCount > 0 && paidCount === totalCount
+          }
         }
       })
     )
