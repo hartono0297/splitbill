@@ -232,7 +232,6 @@ const formatDate = (dateString) => {
 
 const toggleBill = (bill) => {
   if (selectedBill.value?.id === bill.id) {
-    emit('refresh')
     selectedBill.value = null
   } else {
     selectedBill.value = bill
@@ -246,7 +245,6 @@ const handleClickOutside = (event) => {
   const isClickOnBillCard = clickedElement.closest('.bill-card')
 
   if (!isClickOnBillCard && !showDeleteModal.value) {
-    emit('refresh')
     selectedBill.value = null
   }
 }
