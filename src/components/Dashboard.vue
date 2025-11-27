@@ -42,8 +42,8 @@
       </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto px-4 py-8">
-      <div class="grid lg:grid-cols-3 gap-6">
+    <div class="max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
+      <div class="grid lg:grid-cols-3 gap-4 sm:gap-6">
         <div class="lg:col-span-2">
           <div class="flex gap-2 sm:gap-4 mb-6">
             <button

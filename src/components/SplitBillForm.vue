@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 mb-6 transition-colors">
+  <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 transition-colors">
     <div class="space-y-4 mb-6">
       <div>
         <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
