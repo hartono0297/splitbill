@@ -247,6 +247,7 @@ const handleClickOutside = (event) => {
 
   if (!isClickOnBillCard && !showDeleteModal.value) {
     selectedBill.value = null
+    emit('refresh')
   }
 }
 
