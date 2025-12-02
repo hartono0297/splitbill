@@ -14,13 +14,10 @@
 
         <div class="flex items-center gap-3">
           <button
-            @click="showDetailsOnly = !showDetailsOnly"
-            class="flex items-center gap-2 px-4 py-2 bg-slate-500 hover:bg-slate-600 text-white rounded-lg transition"
+            @click="showParticipantDetails = !showParticipantDetails"
+            class="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-md transition border border-slate-300 dark:border-slate-600"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            {{ showDetailsOnly ? 'Show Details' : 'Hide Details' }}
+            {{ showParticipantDetails ? 'Hide' : 'Show' }} Breakdown
           </button>
           <DarkModeToggle />
           <button
@@ -57,7 +54,7 @@
           <h2 class="text-2xl font-semibold text-slate-800 dark:text-white mb-4">{{ bill.title }}</h2>
         </div>
 
-        <div class="mb-8">
+        <div v-if="showParticipantDetails" class="mb-8">
           <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4">Participants</h3>
           <div class="space-y-3">
             <div
@@ -75,7 +72,7 @@
                 <span class="text-lg font-bold text-green-600 dark:text-green-400">Rp {{ formatRupiah(participant.amount) }}</span>
               </div>
 
-              <div v-if="!showDetailsOnly" class="px-4 pb-4 pt-2 border-t border-slate-200 dark:border-slate-600">
+              <div class="px-4 pb-4 pt-2 border-t border-slate-200 dark:border-slate-600">
                 <div class="space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
                   <div class="flex justify-between">
                     <span>Share of Original Amount</span>
@@ -97,24 +94,24 @@
           </div>
         </div>
 
-        <div v-if="bill.transfer_method" class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 transition-colors">
+        <div v-if="bill.transfer_method || (userPreferences && userPreferences.default_transfer_method)" class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 transition-colors">
           <h3 class="text-md font-semibold text-slate-700 dark:text-slate-300 mb-2">Transfer To:</h3>
           <div class="text-sm text-slate-600 dark:text-slate-400 space-y-1">
-            <p><span class="font-medium">Method:</span> {{ formatTransferMethod(bill.transfer_method) }}</p>
-            <p v-if="bill.bank_name"><span class="font-medium">Bank:</span> {{ bill.bank_name }}</p>
-            <p v-if="bill.transfer_account"><span class="font-medium">Account:</span> {{ bill.transfer_account }}</p>
-            <p v-if="bill.transfer_description"><span class="font-medium">Description:</span> {{ bill.transfer_description }}</p>
+            <p><span class="font-medium">Method:</span> {{ formatTransferMethod(bill.transfer_method || userPreferences?.default_transfer_method) }}</p>
+            <p v-if="bill.bank_name || userPreferences?.default_bank_name"><span class="font-medium">Bank:</span> {{ bill.bank_name || userPreferences?.default_bank_name }}</p>
+            <p v-if="bill.transfer_account || userPreferences?.default_transfer_account"><span class="font-medium">Account:</span> {{ bill.transfer_account || userPreferences?.default_transfer_account }}</p>
+            <p v-if="bill.transfer_description || userPreferences?.default_transfer_description"><span class="font-medium">Description:</span> {{ bill.transfer_description || userPreferences?.default_transfer_description }}</p>
           </div>
         </div>
 
         <div class="border-t border-slate-200 dark:border-slate-700 pt-6">
           <div class="space-y-3">
-            <div v-if="!showDetailsOnly" class="flex justify-between items-center text-slate-700 dark:text-slate-300">
+            <div class="flex justify-between items-center text-slate-700 dark:text-slate-300">
               <span class="font-medium">Original Amount</span>
               <span class="text-xl font-semibold">Rp {{ formatRupiah(bill.total_amount) }}</span>
             </div>
 
-            <div v-if="!showDetailsOnly && bill.discount_percent > 0" class="flex justify-between items-center text-slate-600 dark:text-slate-400">
+            <div v-if="bill.discount_percent > 0" class="flex justify-between items-center text-slate-600 dark:text-slate-400">
               <span class="text-sm">
                 Discount ({{ bill.discount_percent }}%
                 <span v-if="bill.max_discount > 0">max Rp {{ formatRupiah(bill.max_discount) }}</span>)
@@ -125,7 +122,6 @@
             </div>
 
             <div
-              v-if="!showDetailsOnly"
               v-for="fee in fees"
               :key="fee.id"
               class="flex justify-between items-center text-slate-600 dark:text-slate-400"
@@ -164,7 +160,8 @@ const participants = ref([])
 const fees = ref([])
 const loading = ref(true)
 const error = ref('')
-const showDetailsOnly = ref(false)
+const showParticipantDetails = ref(true)
+const userPreferences = ref(null)
 
 const loadBill = async () => {
   loading.value = true
@@ -201,6 +198,17 @@ const loadBill = async () => {
 
     if (feesError) throw feesError
     fees.value = feesData || []
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const { data: prefsData } = await supabase
+        .from('user_preferences')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      userPreferences.value = prefsData
+    }
   } catch (err) {
     console.error('Error loading bill:', err)
     error.value = err.message || 'Failed to load bill'

@@ -67,7 +67,7 @@
 
         <h4 class="text-md font-semibold text-slate-800 dark:text-white mb-3">Currency Format</h4>
 
-        <div class="space-y-3">
+        <div class="space-y-3 mb-6">
           <label class="flex items-center p-4 border-2 rounded-xl cursor-pointer transition hover:bg-slate-50 dark:hover:bg-slate-700"
             :class="currencyFormat === 'IDR' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-slate-200 dark:border-slate-600'"
           >
@@ -97,6 +97,56 @@
               <p class="text-sm text-slate-600 dark:text-slate-400">Format: $50,000</p>
             </div>
           </label>
+        </div>
+
+        <h4 class="text-md font-semibold text-slate-800 dark:text-white mb-3">Default Payment Method</h4>
+        <p class="text-sm text-slate-600 dark:text-slate-400 mb-3">This will be shown in PDFs when no payment method is specified for a bill.</p>
+
+        <div class="space-y-3">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Transfer Method</label>
+            <select
+              v-model="defaultTransferMethod"
+              class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-slate-800 dark:text-white"
+            >
+              <option value="">None</option>
+              <option value="bank">Bank Account</option>
+              <option value="ovo">OVO</option>
+              <option value="dana">DANA</option>
+              <option value="gopay">GoPay</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div v-if="defaultTransferMethod === 'bank'">
+            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Bank Name</label>
+            <input
+              v-model="defaultBankName"
+              type="text"
+              placeholder="e.g., BCA, Mandiri"
+              class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-slate-800 dark:text-white"
+            />
+          </div>
+
+          <div v-if="defaultTransferMethod">
+            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Account Number/ID</label>
+            <input
+              v-model="defaultTransferAccount"
+              type="text"
+              placeholder="Enter account number"
+              class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-slate-800 dark:text-white"
+            />
+          </div>
+
+          <div v-if="defaultTransferMethod">
+            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Description (Optional)</label>
+            <input
+              v-model="defaultTransferDescription"
+              type="text"
+              placeholder="e.g., Account holder name"
+              class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-slate-800 dark:text-white"
+            />
+          </div>
 
           <button
             @click="savePreferences"
@@ -133,6 +183,10 @@ const passwordError = ref(false)
 
 const currencyFormat = ref('IDR')
 const darkMode = ref(false)
+const defaultTransferMethod = ref('')
+const defaultBankName = ref('')
+const defaultTransferAccount = ref('')
+const defaultTransferDescription = ref('')
 const isSavingPreferences = ref(false)
 const preferencesMessage = ref('')
 const preferencesError = ref(false)
@@ -149,6 +203,10 @@ const loadPreferences = async () => {
 
     if (data) {
       currencyFormat.value = data.currency_format || 'IDR'
+      defaultTransferMethod.value = data.default_transfer_method || ''
+      defaultBankName.value = data.default_bank_name || ''
+      defaultTransferAccount.value = data.default_transfer_account || ''
+      defaultTransferDescription.value = data.default_transfer_description || ''
       emit('preferences-updated', currencyFormat.value)
     }
   } catch (error) {
@@ -211,6 +269,10 @@ const savePreferences = async () => {
         .from('user_preferences')
         .update({
           currency_format: currencyFormat.value,
+          default_transfer_method: defaultTransferMethod.value || null,
+          default_bank_name: defaultBankName.value || null,
+          default_transfer_account: defaultTransferAccount.value || null,
+          default_transfer_description: defaultTransferDescription.value || null,
           updated_at: new Date().toISOString()
         })
         .eq('user_id', props.user.id)
@@ -221,7 +283,11 @@ const savePreferences = async () => {
         .from('user_preferences')
         .insert({
           user_id: props.user.id,
-          currency_format: currencyFormat.value
+          currency_format: currencyFormat.value,
+          default_transfer_method: defaultTransferMethod.value || null,
+          default_bank_name: defaultBankName.value || null,
+          default_transfer_account: defaultTransferAccount.value || null,
+          default_transfer_description: defaultTransferDescription.value || null
         })
 
       if (error) throw error
