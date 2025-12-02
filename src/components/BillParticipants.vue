@@ -22,7 +22,7 @@
         <div class="space-y-1 text-xs text-slate-600 dark:text-slate-400">
           <div class="flex justify-between">
             <span>Share of Original Amount</span>
-            <span>Rp {{ formatRupiah(participant.amount * bill.total_amount / bill.final_amount) }}</span>
+            <span>Rp {{ formatRupiah(participant.original_amount || (participant.amount * bill.total_amount / bill.final_amount)) }}</span>
           </div>
 
           <div v-if="bill.discount_percent > 0" class="flex justify-between text-red-600 dark:text-red-400">

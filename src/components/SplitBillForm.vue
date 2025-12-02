@@ -428,6 +428,13 @@ const getPersonFinalAmount = (participant, index) => {
   return amountPerPerson.value
 }
 
+const getPersonOriginalAmount = (participant, index) => {
+  if (useIndividualAmounts.value) {
+    return participant.amount || 0
+  }
+  return calculatedTotalAmount.value / participants.value.length
+}
+
 const getCurrencySymbol = () => {
   return props.currencyFormat === 'USD' ? '$' : 'Rp'
 }
@@ -783,7 +790,8 @@ const saveBill = async () => {
     const participantsData = participants.value.map((p, index) => ({
       bill_id: billData.id,
       name: p.name || 'Anonymous',
-      amount: useIndividualAmounts.value ? getPersonFinalAmount(p, index) : amountPerPerson.value
+      amount: useIndividualAmounts.value ? getPersonFinalAmount(p, index) : amountPerPerson.value,
+      original_amount: getPersonOriginalAmount(p, index)
     }))
 
     const { error: participantsError } = await supabase
