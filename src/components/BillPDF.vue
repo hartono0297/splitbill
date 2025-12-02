@@ -13,6 +13,15 @@
         </button>
 
         <div class="flex items-center gap-3">
+          <button
+            @click="showDetailsOnly = !showDetailsOnly"
+            class="flex items-center gap-2 px-4 py-2 bg-slate-500 hover:bg-slate-600 text-white rounded-lg transition"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {{ showDetailsOnly ? 'Show Details' : 'Hide Details' }}
+          </button>
           <DarkModeToggle />
           <button
             @click="printPDF"
@@ -66,7 +75,7 @@
                 <span class="text-lg font-bold text-green-600 dark:text-green-400">Rp {{ formatRupiah(participant.amount) }}</span>
               </div>
 
-              <div class="px-4 pb-4 pt-2 border-t border-slate-200 dark:border-slate-600">
+              <div v-if="!showDetailsOnly" class="px-4 pb-4 pt-2 border-t border-slate-200 dark:border-slate-600">
                 <div class="space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
                   <div class="flex justify-between">
                     <span>Share of Original Amount</span>
@@ -100,12 +109,12 @@
 
         <div class="border-t border-slate-200 dark:border-slate-700 pt-6">
           <div class="space-y-3">
-            <div class="flex justify-between items-center text-slate-700 dark:text-slate-300">
+            <div v-if="!showDetailsOnly" class="flex justify-between items-center text-slate-700 dark:text-slate-300">
               <span class="font-medium">Original Amount</span>
               <span class="text-xl font-semibold">Rp {{ formatRupiah(bill.total_amount) }}</span>
             </div>
 
-            <div v-if="bill.discount_percent > 0" class="flex justify-between items-center text-slate-600 dark:text-slate-400">
+            <div v-if="!showDetailsOnly && bill.discount_percent > 0" class="flex justify-between items-center text-slate-600 dark:text-slate-400">
               <span class="text-sm">
                 Discount ({{ bill.discount_percent }}%
                 <span v-if="bill.max_discount > 0">max Rp {{ formatRupiah(bill.max_discount) }}</span>)
@@ -116,6 +125,7 @@
             </div>
 
             <div
+              v-if="!showDetailsOnly"
               v-for="fee in fees"
               :key="fee.id"
               class="flex justify-between items-center text-slate-600 dark:text-slate-400"
@@ -154,6 +164,7 @@ const participants = ref([])
 const fees = ref([])
 const loading = ref(true)
 const error = ref('')
+const showDetailsOnly = ref(false)
 
 const loadBill = async () => {
   loading.value = true
@@ -271,6 +282,51 @@ onMounted(() => {
   #pdf-content {
     box-shadow: none;
     border-radius: 0;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .dark\:bg-slate-800 {
+      background-color: rgb(30 41 59) !important;
+    }
+    .dark\:bg-slate-700 {
+      background-color: rgb(51 65 85) !important;
+    }
+    .dark\:text-white {
+      color: rgb(255 255 255) !important;
+    }
+    .dark\:text-slate-200 {
+      color: rgb(226 232 240) !important;
+    }
+    .dark\:text-slate-300 {
+      color: rgb(203 213 225) !important;
+    }
+    .dark\:text-slate-400 {
+      color: rgb(148 163 184) !important;
+    }
+    .dark\:border-slate-700 {
+      border-color: rgb(51 65 85) !important;
+    }
+    .dark\:border-slate-600 {
+      border-color: rgb(71 85 105) !important;
+    }
+    .dark\:bg-blue-600 {
+      background-color: rgb(37 99 235) !important;
+    }
+    .dark\:bg-blue-900\/20 {
+      background-color: rgba(30 58 138 / 0.2) !important;
+    }
+    .dark\:border-blue-800 {
+      border-color: rgb(30 64 175) !important;
+    }
+    .dark\:text-green-400 {
+      color: rgb(74 222 128) !important;
+    }
+    .dark\:text-red-400 {
+      color: rgb(248 113 113) !important;
+    }
+    body {
+      background-color: rgb(30 41 59) !important;
+    }
   }
 }
 </style>
