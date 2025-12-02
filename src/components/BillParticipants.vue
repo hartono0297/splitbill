@@ -27,12 +27,12 @@
 
           <div v-if="bill.discount_percent > 0" class="flex justify-between text-red-600 dark:text-red-400">
             <span>Discount ({{ bill.discount_percent }}%)</span>
-            <span>- Rp {{ formatRupiah(calculateParticipantDiscount(participant.amount)) }}</span>
+            <span>- Rp {{ formatRupiah(calculateParticipantDiscount(participant)) }}</span>
           </div>
 
           <div v-if="fees.length > 0" v-for="fee in fees" :key="fee.id" class="flex justify-between text-green-600 dark:text-green-400">
             <span>{{ fee.name }}</span>
-            <span>+ Rp {{ formatRupiah(calculateParticipantFee(participant.amount, fee.amount)) }}</span>
+            <span>+ Rp {{ formatRupiah(calculateParticipantFee(fee.amount)) }}</span>
           </div>
         </div>
       </div>
@@ -95,16 +95,16 @@ const formatRupiah = (amount) => {
   return new Intl.NumberFormat('id-ID').format(Math.round(amount))
 }
 
-const calculateParticipantDiscount = (participantAmount) => {
-  if (!bill.value) return 0
+const calculateParticipantDiscount = (participant) => {
+  if (!bill.value || !participant.original_amount) return 0
   const totalDiscount = (bill.value.total_amount * bill.value.discount_percent) / 100
   const cappedDiscount = bill.value.max_discount > 0 ? Math.min(totalDiscount, bill.value.max_discount) : totalDiscount
-  return (participantAmount / bill.value.final_amount) * cappedDiscount
+  return (participant.original_amount / bill.value.total_amount) * cappedDiscount
 }
 
-const calculateParticipantFee = (participantAmount, feeAmount) => {
-  if (!bill.value) return 0
-  return (participantAmount / bill.value.final_amount) * feeAmount
+const calculateParticipantFee = (feeAmount) => {
+  if (!bill.value || participants.value.length === 0) return 0
+  return feeAmount / participants.value.length
 }
 
 watch(() => props.billId, () => {
