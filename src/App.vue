@@ -8,6 +8,11 @@
         <p class="text-slate-600 font-medium">Loading...</p>
       </div>
     </div>
+    <Toast
+      v-model="toastState.show"
+      :message="toastState.message"
+      :type="toastState.type"
+    />
   </div>
 </template>
 
@@ -16,8 +21,11 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { supabase } from './supabase.js'
 import AuthPage from './components/AuthPage.vue'
+import Toast from './components/Toast.vue'
+import { useToast } from './composables/useToast.js'
 
 const route = useRoute()
+const { toastState } = useToast()
 const user = ref(null)
 const loading = ref(true)
 

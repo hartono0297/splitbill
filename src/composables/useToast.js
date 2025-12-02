@@ -1,20 +1,27 @@
 import { ref } from 'vue'
 
-const toastMessage = ref('')
-const toastType = ref('success')
-const toastKey = ref(0)
+const toastState = ref({
+  show: false,
+  message: '',
+  type: 'success'
+})
 
 export const useToast = () => {
   const showToast = (message, type = 'success') => {
-    toastMessage.value = message
-    toastType.value = type
-    toastKey.value++
+    toastState.value = {
+      show: true,
+      message,
+      type
+    }
+  }
+
+  const hideToast = () => {
+    toastState.value.show = false
   }
 
   return {
-    toastMessage,
-    toastType,
-    toastKey,
-    showToast
+    toastState,
+    showToast,
+    hideToast
   }
 }
