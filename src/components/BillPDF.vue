@@ -147,13 +147,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { supabase } from '../supabase.js'
 import DarkModeToggle from './DarkModeToggle.vue'
+import { useMetaTags } from '../composables/useMetaTags.js'
 
 const router = useRouter()
 const route = useRoute()
+const { updateMetaTags, resetMetaTags } = useMetaTags()
 
 const bill = ref(null)
 const participants = ref([])
@@ -199,6 +201,16 @@ const loadBill = async () => {
     if (!billData) throw new Error('Bill not found')
 
     bill.value = billData
+
+    const billTitle = `${billData.title} - splitmybills`
+    const billDescription = billData.description || `Split bill for ${billData.title}. Total: Rp ${formatRupiah(billData.final_amount)} split among ${billData.title === 'Unknown' ? 'multiple' : ''} participants.`
+    const shareUrl = window.location.href
+
+    updateMetaTags({
+      title: billTitle,
+      description: billDescription,
+      url: shareUrl
+    })
 
     const { data: participantsData, error: participantsError } = await supabase
       .from('participants')
@@ -306,6 +318,10 @@ onMounted(async () => {
   if (darkModeToggle.value) {
     darkModeToggle.value.initializeDarkMode()
   }
+})
+
+onUnmounted(() => {
+  resetMetaTags()
 })
 </script>
 

@@ -39,9 +39,22 @@
         <input
           v-model="billTitle"
           type="text"
-          placeholder="e.g., Dinner at Pizza Place"
+          placeholder="e.g., Pizza Hut Dinner"
           class="w-full px-3 py-2 sm:px-4 sm:py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-sm sm:text-base text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
         />
+      </div>
+
+      <div>
+        <label class="block text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 sm:mb-2">
+          Description (Optional)
+        </label>
+        <input
+          v-model="billDescription"
+          type="text"
+          placeholder="e.g., Team dinner with colleagues"
+          class="w-full px-3 py-2 sm:px-4 sm:py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-sm sm:text-base text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
+        />
+        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">This will appear when you share the bill link</p>
       </div>
 
       <div v-if="!useIndividualAmounts">
@@ -349,6 +362,7 @@ const props = defineProps({
 })
 
 const billTitle = ref('')
+const billDescription = ref('')
 const totalAmount = ref(0)
 const discountPercent = ref(0)
 const maxDiscount = ref(0)
@@ -761,6 +775,7 @@ const saveBill = async () => {
     const billInsertData = {
       user_id: user.id,
       title: billTitle.value,
+      description: billDescription.value || null,
       total_amount: calculatedTotalAmount.value,
       discount_percent: discountPercent.value || 0,
       max_discount: maxDiscount.value || 0,
@@ -838,6 +853,7 @@ const saveBill = async () => {
 
 const resetBill = () => {
   billTitle.value = ''
+  billDescription.value = ''
   totalAmount.value = 0
   discountPercent.value = 0
   maxDiscount.value = 0
