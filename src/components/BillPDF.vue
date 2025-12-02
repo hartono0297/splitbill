@@ -54,7 +54,7 @@
           <h2 class="text-2xl font-semibold text-slate-800 dark:text-white mb-4">{{ bill.title }}</h2>
         </div>
 
-        <div v-if="showParticipantDetails" class="mb-8">
+        <div class="mb-8">
           <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4">Participants</h3>
           <div class="space-y-3">
             <div
@@ -72,7 +72,7 @@
                 <span class="text-lg font-bold text-green-600 dark:text-green-400">Rp {{ formatRupiah(participant.amount) }}</span>
               </div>
 
-              <div class="px-4 pb-4 pt-2 border-t border-slate-200 dark:border-slate-600">
+              <div v-if="showParticipantDetails" class="px-4 pb-4 pt-2 border-t border-slate-200 dark:border-slate-600">
                 <div class="space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
                   <div class="flex justify-between">
                     <span>Share of Original Amount</span>
