@@ -87,6 +87,16 @@
             <span class="sm:hidden">View</span>
           </button>
           <button
+            @click="toggleShareLink(bill)"
+            class="flex-1 py-2 px-4 bg-green-500 hover:bg-green-600 text-white font-medium rounded-lg transition flex items-center justify-center gap-2"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+            <span class="hidden sm:inline">Share</span>
+            <span class="sm:hidden">Share</span>
+          </button>
+          <button
             @click="confirmDelete(bill)"
             class="sm:flex-none py-2 px-4 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition flex items-center justify-center gap-2"
           >
@@ -95,6 +105,29 @@
             </svg>
             <span class="sm:hidden">Delete</span>
           </button>
+        </div>
+
+        <div v-if="bill.shareLink" class="mt-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+          <p class="text-xs text-green-800 dark:text-green-300 font-medium mb-2">Shareable Link (Anyone with this link can view)</p>
+          <div class="flex gap-2">
+            <input
+              :value="bill.shareLink"
+              readonly
+              class="flex-1 px-3 py-2 text-xs bg-white dark:bg-slate-800 border border-green-300 dark:border-green-700 rounded text-slate-700 dark:text-slate-300"
+            />
+            <button
+              @click="copyShareLink(bill.shareLink)"
+              class="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition text-xs font-medium"
+            >
+              Copy
+            </button>
+            <button
+              @click="disableShareLink(bill)"
+              class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition text-xs font-medium"
+            >
+              Disable
+            </button>
+          </div>
         </div>
 
         <div v-if="selectedBill?.id === bill.id" class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-600 space-y-4">
@@ -282,6 +315,68 @@ const formatTransferMethod = (method) => {
     other: 'Other'
   }
   return methods[method] || method
+}
+
+const generateShareToken = () => {
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+}
+
+const toggleShareLink = async (bill) => {
+  if (bill.shareLink) {
+    return
+  }
+
+  try {
+    const shareToken = generateShareToken()
+    const { error } = await supabase
+      .from('bills')
+      .update({
+        is_public: true,
+        share_token: shareToken
+      })
+      .eq('id', bill.id)
+
+    if (error) throw error
+
+    const shareLink = `${window.location.origin}/share/${shareToken}`
+    bill.shareLink = shareLink
+    bill.is_public = true
+    bill.share_token = shareToken
+  } catch (error) {
+    console.error('Error generating share link:', error)
+    alert('Failed to generate share link')
+  }
+}
+
+const copyShareLink = async (link) => {
+  try {
+    await navigator.clipboard.writeText(link)
+    alert('Link copied to clipboard!')
+  } catch (error) {
+    console.error('Error copying link:', error)
+    alert('Failed to copy link')
+  }
+}
+
+const disableShareLink = async (bill) => {
+  try {
+    const { error } = await supabase
+      .from('bills')
+      .update({
+        is_public: false,
+        share_token: null
+      })
+      .eq('id', bill.id)
+
+    if (error) throw error
+
+    bill.shareLink = null
+    bill.is_public = false
+    bill.share_token = null
+  } catch (error) {
+    console.error('Error disabling share link:', error)
+    alert('Failed to disable share link')
+  }
 }
 
 const deleteBill = async () => {

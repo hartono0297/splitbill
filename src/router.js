@@ -16,6 +16,11 @@ const routes = [
     path: '/bill/:id',
     name: 'BillPDF',
     component: BillPDF
+  },
+  {
+    path: '/share/:token',
+    name: 'SharedBillPDF',
+    component: BillPDF
   }
 ]
 

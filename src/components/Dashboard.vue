@@ -239,7 +239,8 @@ const loadBills = async () => {
             total_count: totalCount,
             paid_count: paidCount,
             all_paid: totalCount > 0 && paidCount === totalCount
-          }
+          },
+          shareLink: bill.is_public && bill.share_token ? `${window.location.origin}/share/${bill.share_token}` : null
         }
       })
     )

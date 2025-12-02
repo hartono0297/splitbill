@@ -169,12 +169,30 @@ const loadBill = async () => {
 
   try {
     const billId = route.params.id
+    const shareToken = route.params.token
 
-    const { data: billData, error: billError } = await supabase
-      .from('bills')
-      .select('*')
-      .eq('id', billId)
-      .maybeSingle()
+    let billData, billError
+
+    if (shareToken) {
+      const result = await supabase
+        .from('bills')
+        .select('*')
+        .eq('share_token', shareToken)
+        .eq('is_public', true)
+        .maybeSingle()
+
+      billData = result.data
+      billError = result.error
+    } else {
+      const result = await supabase
+        .from('bills')
+        .select('*')
+        .eq('id', billId)
+        .maybeSingle()
+
+      billData = result.data
+      billError = result.error
+    }
 
     if (billError) throw billError
     if (!billData) throw new Error('Bill not found')
@@ -184,7 +202,7 @@ const loadBill = async () => {
     const { data: participantsData, error: participantsError } = await supabase
       .from('participants')
       .select('*')
-      .eq('bill_id', billId)
+      .eq('bill_id', billData.id)
       .order('created_at', { ascending: true })
 
     if (participantsError) throw participantsError
@@ -193,18 +211,28 @@ const loadBill = async () => {
     const { data: feesData, error: feesError } = await supabase
       .from('fees')
       .select('*')
-      .eq('bill_id', billId)
+      .eq('bill_id', billData.id)
       .order('created_at', { ascending: true })
 
     if (feesError) throw feesError
     fees.value = feesData || []
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
+    if (!shareToken) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: prefsData } = await supabase
+          .from('user_preferences')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle()
+
+        userPreferences.value = prefsData
+      }
+    } else {
       const { data: prefsData } = await supabase
         .from('user_preferences')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', billData.user_id)
         .maybeSingle()
 
       userPreferences.value = prefsData
