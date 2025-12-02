@@ -4,10 +4,13 @@
       <div class="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
         <div class="flex items-center justify-between gap-2">
           <div class="flex items-center gap-2 min-w-0 flex-shrink">
-            <div class="flex items-center gap-2">
-              <div class="relative flex-shrink-0">
-                <div class="w-1 h-7 sm:h-10 bg-slate-800 dark:bg-slate-100 rounded-full"></div>
-                <div class="absolute top-0 -right-1 w-1 h-7 sm:h-10 bg-slate-400 dark:bg-slate-500 rounded-full opacity-60"></div>
+            <div class="flex items-center gap-2.5">
+              <div class="relative flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10">
+                <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+                  <circle cx="20" cy="20" r="18" class="stroke-slate-800 dark:stroke-slate-100" stroke-width="2" fill="none"/>
+                  <line x1="20" y1="8" x2="20" y2="32" class="stroke-slate-800 dark:stroke-slate-100" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="8" y1="20" x2="32" y2="20" class="stroke-slate-800 dark:stroke-slate-100" stroke-width="2" stroke-linecap="round"/>
+                </svg>
               </div>
               <h1 class="text-base sm:text-2xl font-light text-slate-800 dark:text-white tracking-tight truncate" style="font-family: 'Helvetica Neue', 'Arial', sans-serif; letter-spacing: 0.03em;">
                 split<span class="font-extralight text-slate-600 dark:text-slate-400">my</span>bills
