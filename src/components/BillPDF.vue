@@ -320,49 +320,64 @@ onMounted(() => {
     border-radius: 0;
   }
 
-  @media (prefers-color-scheme: dark) {
-    .dark\:bg-slate-800 {
-      background-color: rgb(30 41 59) !important;
-    }
-    .dark\:bg-slate-700 {
-      background-color: rgb(51 65 85) !important;
-    }
-    .dark\:text-white {
-      color: rgb(255 255 255) !important;
-    }
-    .dark\:text-slate-200 {
-      color: rgb(226 232 240) !important;
-    }
-    .dark\:text-slate-300 {
-      color: rgb(203 213 225) !important;
-    }
-    .dark\:text-slate-400 {
-      color: rgb(148 163 184) !important;
-    }
-    .dark\:border-slate-700 {
-      border-color: rgb(51 65 85) !important;
-    }
-    .dark\:border-slate-600 {
-      border-color: rgb(71 85 105) !important;
-    }
-    .dark\:bg-blue-600 {
-      background-color: rgb(37 99 235) !important;
-    }
-    .dark\:bg-blue-900\/20 {
-      background-color: rgba(30 58 138 / 0.2) !important;
-    }
-    .dark\:border-blue-800 {
-      border-color: rgb(30 64 175) !important;
-    }
-    .dark\:text-green-400 {
-      color: rgb(74 222 128) !important;
-    }
-    .dark\:text-red-400 {
-      color: rgb(248 113 113) !important;
-    }
-    body {
-      background-color: rgb(30 41 59) !important;
-    }
+  * {
+    color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body,
+  .dark\:bg-slate-900,
+  .dark\:to-slate-800,
+  .dark\:from-slate-900 {
+    background-color: white !important;
+  }
+
+  .dark\:bg-slate-800,
+  .dark\:bg-slate-700\/50 {
+    background-color: white !important;
+    border: 1px solid rgb(226 232 240) !important;
+  }
+
+  .dark\:bg-slate-700,
+  .dark\:bg-slate-600 {
+    background-color: rgb(248 250 252) !important;
+  }
+
+  .dark\:text-white,
+  .dark\:text-slate-200,
+  .dark\:text-slate-300 {
+    color: rgb(30 41 59) !important;
+  }
+
+  .dark\:text-slate-400,
+  .dark\:text-slate-500 {
+    color: rgb(100 116 139) !important;
+  }
+
+  .dark\:border-slate-700,
+  .dark\:border-slate-600 {
+    border-color: rgb(226 232 240) !important;
+  }
+
+  .dark\:bg-blue-900\/20 {
+    background-color: rgb(239 246 255) !important;
+  }
+
+  .dark\:border-blue-800 {
+    border-color: rgb(191 219 254) !important;
+  }
+
+  .dark\:bg-blue-600 {
+    background-color: rgb(59 130 246) !important;
+  }
+
+  .dark\:text-green-400 {
+    color: rgb(22 163 74) !important;
+  }
+
+  .dark\:text-red-400 {
+    color: rgb(220 38 38) !important;
   }
 }
 </style>
