@@ -19,7 +19,7 @@
           >
             {{ showParticipantDetails ? 'Hide' : 'Show' }} Breakdown
           </button>
-          <DarkModeToggle />
+          <DarkModeToggle ref="darkModeToggle" :user-id="userPreferences?.user_id" />
           <button
             @click="printPDF"
             class="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition"
@@ -162,6 +162,7 @@ const loading = ref(true)
 const error = ref('')
 const showParticipantDetails = ref(true)
 const userPreferences = ref(null)
+const darkModeToggle = ref(null)
 
 const loadBill = async () => {
   loading.value = true
@@ -300,8 +301,11 @@ const printPDF = () => {
   window.print()
 }
 
-onMounted(() => {
-  loadBill()
+onMounted(async () => {
+  await loadBill()
+  if (darkModeToggle.value) {
+    darkModeToggle.value.initializeDarkMode()
+  }
 })
 </script>
 
