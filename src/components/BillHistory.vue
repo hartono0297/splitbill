@@ -196,6 +196,8 @@
         </div>
       </div>
     </div>
+
+    <Toast :key="toastKey" :message="toastMessage" :type="toastType" />
   </div>
 </template>
 
@@ -205,8 +207,11 @@ import { useRouter } from 'vue-router'
 import { supabase } from '../supabase.js'
 import BillParticipants from './BillParticipants.vue'
 import PaymentVerification from './PaymentVerification.vue'
+import Toast from './Toast.vue'
+import { useToast } from '../composables/useToast.js'
 
 const router = useRouter()
+const { toastMessage, toastType, toastKey, showToast } = useToast()
 
 const props = defineProps({
   bills: {
@@ -344,17 +349,17 @@ const toggleShareLink = async (bill) => {
     bill.share_token = shareToken
   } catch (error) {
     console.error('Error generating share link:', error)
-    alert('Failed to generate share link')
+    showToast('Failed to generate share link', 'error')
   }
 }
 
 const copyShareLink = async (link) => {
   try {
     await navigator.clipboard.writeText(link)
-    alert('Link copied to clipboard!')
+    showToast('Link copied to clipboard!', 'success')
   } catch (error) {
     console.error('Error copying link:', error)
-    alert('Failed to copy link')
+    showToast('Failed to copy link', 'error')
   }
 }
 
